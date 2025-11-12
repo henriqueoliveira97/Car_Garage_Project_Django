@@ -1,15 +1,44 @@
+🚗 AutoTech - Sistema de Gestão de Oficina em Django
 
-**General Notes**
+O AutoTech é uma aplicação web desenvolvida em Django que permite gerir uma oficina automóvel de forma moderna e eficiente.
+Com ela, é possível:
 
-An `onlinecourse` app has already been provided in this repo upon which you will be adding a new assesement feature.
+-Registar clientes, viaturas e reparações.
+-Associar mecânicos e peças a cada reparação.
+-Calcular automaticamente o custo total de cada serviço.
+-Permitir que os clientes acompanhem o estado da reparação da sua viatura online.
 
-- If you want to develop the final project on Theia hosted by [IBM Developer Skills Network](https://labs.cognitiveclass.ai/), you will need to create the same project structure on Theia workspace and save it everytime you close the browser
-- Or you could develop the final project locally by setting up your own Python runtime and IDE
-- Hints for the final project are left on source code files
-- You may choose any cloud platform for deployment (default is IBM Cloud Foundry)
-- Depends on your deployment, you may choose any SQL database Django supported such as SQLite3, PostgreSQL, and MySQL (default is SQLite3)
+O objetivo é digitalizar o processo de gestão de uma oficina, tornando-o mais transparente tanto para o cliente.
 
-**ER Diagram**
-For your reference, we have prepared the ER diagram design for the new assesement feature.
+⚙️ Funcionalidades Principais
+✅ Registo e autenticação de utilizadores (clientes e mecânicos)
+✅ Registo de viaturas associadas a clientes
+✅ Criação e acompanhamento de reparações
+✅ Gestão de peças e custos através de relações ManyToMany
+✅ Área de administração completa no Django Admin
+✅ Acompanhamento online do estado da reparação pelo cliente
 
-![Onlinecourse ER Diagram](https://github.com/ibm-developer-skills-network/final-cloud-app-with-database/blob/master/static/media/course_images/onlinecourse_app_er.png)
+🚀 Como Executar o Projeto Localmente
+-Clona o repositório
+git clone https://github.com/henriqueoliveira97/Car_Garage_Project_Django.git
+cd Car_Garage_Project_Django
+
+-Cria e ativa o ambiente virtual
+python -m venv venv
+venv\Scripts\activate   # no Windows
+# ou
+source venv/bin/activate   # no Linux/Mac
+
+-Instala as dependências
+pip install -r requirements.txt
+
+-Aplica as migrações
+python manage.py makemigrations
+python manage.py migrate
+
+-Cria um superutilizador (para aceder ao admin)
+python manage.py createsuperuser
+
+
+-Corre o servidor
+python manage.py runserver
