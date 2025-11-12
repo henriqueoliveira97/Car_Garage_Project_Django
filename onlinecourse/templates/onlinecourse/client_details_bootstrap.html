@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+     {% load static %}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+    <!-- Navigation bar -->
+    <nav class="navbar navbar-light bg-light">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                  <a class="navbar-brand" href="{% url 'onlinecourse:index' %}">Home</a>
+            </div>
+            <ul class="nav navbar-nav navbar-right">
+                {% if user.is_authenticated %}
+                
+                <li>
+                    <a class="btn btn-link" href="#">{{ user.first_name }}({{ user.username }})</a>
+                    <a class="btn btn-link" href="{% url 'onlinecourse:logout' %}">Logout</a>
+                </li>
+                {% else %}
+                <li>
+                    <form class="form-inline" action="{% url 'onlinecourse:login' %}" method="post">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Username" name="username" >
+                            <input type="password" class="form-control" placeholder="Username" name="psw" >
+                            <button class="btn btn-primary" type="submit">Login</button>
+                            <a class="btn btn-link" href="{% url 'onlinecourse:registration' %}">Sign Up</a>
+                        </div>
+                    </form>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Page content -->
+    <div class="container-fluid mt-4">
+        <h2>Bem-vindo, {{ user.first_name }}!</h2>
+        <p>Aqui estão as informações sobre as suas viaturas e reparações:</p>
+
+        {% if user.is_authenticated %}
+            {% if viaturas %}
+                {% for viatura in viaturas %}
+                    <div class="card mb-3">
+                        <div class="card-header bg-primary text-white">
+                            <h5>{{ viatura.marca }} {{ viatura.modelo }} ({{ viatura.ano }})</h5>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Tipo:</strong> {{ viatura.tipo }}</p>
+                            <p><strong>Mecânico responsável:</strong> {{ viatura.mecanico.user.username }}</p>
+
+                            <h6 class="mt-3">Reparações:</h6>
+                            {% if viatura.reparacoes.all %}
+                                <ul class="list-group">
+                                    {% for reparacao in viatura.reparacoes.all %}
+                                        <li class="list-group-item">
+                                            <strong>{{ reparacao.descricao }}</strong><br>
+                                            Estado:
+                                            {% if reparacao.status == 'em_andamento' %}
+                                                <span class="badge badge-warning text-dark">Em Andamento</span>
+                                            {% elif reparacao.status == 'concluida' %}
+                                                <span class="badge badge-success">Concluída</span>
+                                            {% elif reparacao.status == 'aguarda_pecas' %}
+                                                <span class="badge badge-secondary">Aguarda Peças</span>
+                                            {% endif %}
+                                            <br>
+                                            Custo Total: <strong>{{ reparacao.custo_total }} €</strong>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="text-muted">Sem reparações registadas para esta viatura.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted">Não tem viaturas registadas.</p>
+            {% endif %}
+        {% else %}
+            <p>Por favor, <a href="{% url 'onlinecourse:login' %}">inicie sessão</a> para ver as suas viaturas.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

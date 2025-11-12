@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <meta charset="UTF-8">
+    <title>Online Courses</title>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .page-background {
+            background-image: url('https://t4.ftcdn.net/jpg/15/53/95/75/360_F_1553957545_qEZSVVqE698u6Tma09GKAEe4R3RCqq26.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .jumbotron, .card, .bg-light {
+            background-color: rgba(255, 255, 255, 0.9) !important; /* Fundo translúcido */
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation bar -->
+    <nav class="navbar navbar-light bg-light">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                  <a class="navbar-brand" href="#">AutoTech</a>
+            </div>
+            <ul class="nav navbar-nav navbar-right">
+                {% if user.is_authenticated %}
+                <li>
+                    <a class="btn btn-link" href="#">{{ user.first_name }}({{ user.username }})</a>
+                    <a class="btn btn-link" href="{% url 'onlinecourse:logout' %}">Logout</a>
+                </li>
+                {% else %}
+                <li>
+                    <form class="form-inline" action="{% url 'onlinecourse:login' %}" method="post">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Username" name="username" >
+                            <input type="password" class="form-control" placeholder="Username" name="psw" >
+                            <button class="btn btn-primary" type="submit">Login</button>
+                            <a class="btn btn-link" href="{% url 'onlinecourse:registration' %}">Sign Up</a>
+                        </div>
+                    </form>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Page content -->
+    <div class="page-background">
+    <div class="container my-5">
+        <!-- Hero Section -->
+        <div class="jumbotron text-center bg-light">
+            <h1 class="display-4">Bem-vindo à <span class="text-primary">AutoTech Reparações</span></h1>
+            <p class="lead">O seu parceiro de confiança para manutenção e reparação automóvel.</p>
+            <hr class="my-4">
+            <p>Oferecemos diagnósticos rápidos, reparações certificadas e acompanhamento online do estado da sua viatura.</p>
+
+            {% if user.is_authenticated %}
+                 <a class="btn btn-primary btn-lg mt-2"
+                    href="{% url 'onlinecourse:viaturas' user.id %}">
+                    Acompanhar Reparação
+                 </a>
+            {% else %}
+                <a class="btn btn-primary btn-lg mt-2" href="{% url 'onlinecourse:login' %}">
+                    Acompanhar Reparação
+                </a>
+                <a class="btn btn-outline-secondary btn-lg mt-2" href="{% url 'onlinecourse:registration' %}">
+                    Registar-se
+                </a>
+            {% endif %}
+        </div>
+
+        <!-- Serviços -->
+        <h2 class="text-center mb-4">Os Nossos Serviços</h2>
+        <div class="row text-center">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">Manutenção Geral</h5>
+                        <p class="card-text">Troca de óleo, filtros, travões e revisão completa para garantir a segurança do seu veículo.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">Diagnóstico Eletrónico</h5>
+                        <p class="card-text">Utilizamos tecnologia avançada para identificar e resolver falhas no sistema eletrónico do seu carro.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">Reparações Mecânicas</h5>
+                        <p class="card-text">Motores, suspensões, embraiagens — reparamos tudo com peças de qualidade e garantia.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Secção de confiança -->
+        <div class="text-center bg-light p-5 mt-5 rounded">
+            <h3 class="mb-3">Mais de 15 anos de experiência ao serviço da sua segurança</h3>
+            <p>Na AutoTech Reparações, a sua viatura é tratada com a máxima dedicação e profissionalismo.  
+               Consulte online o estado da sua reparação ou marque já a próxima revisão.</p>
+            <a href="{% url 'onlinecourse:login' %}" class="btn btn-success mt-2">Ver o Estado da Reparação</a>
+        </div>
+    </div>
+    </div>
+</body>
+</html>
