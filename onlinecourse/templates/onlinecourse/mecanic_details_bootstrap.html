@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+     {% load static %}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+    <!-- Navigation bar -->
+    <nav class="navbar navbar-light bg-light">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                  <a class="navbar-brand" href="{% url 'onlinecourse:index' %}">Home</a>
+            </div>
+            <ul class="nav navbar-nav navbar-right">
+                {% if user.is_authenticated %}
+                
+                <li>
+                    <a class="btn btn-link" href="#">{{ user.first_name }}({{ user.username }})</a>
+                    <a class="btn btn-link" href="{% url 'onlinecourse:logout' %}">Logout</a>
+                </li>
+                {% else %}
+                <li>
+                    <form class="form-inline" action="{% url 'onlinecourse:login' %}" method="post">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Username" name="username" >
+                            <input type="password" class="form-control" placeholder="Username" name="psw" >
+                            <button class="btn btn-primary" type="submit">Login</button>
+                            <a class="btn btn-link" href="{% url 'onlinecourse:registration' %}">Sign Up</a>
+                        </div>
+                    </form>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Page content -->
+    <div class="container-fluid mt-4">
+        <h2>Bem-vindo, {{ user.first_name }}!</h2>
+        <p>Aqui estão as viaturas atribuídas a si:</p>
+
+        {% if user.is_authenticated %}
+            {% if viaturas %}
+                {% for viatura in viaturas %}
+<div class="card mb-3">
+    <div class="card-header bg-primary text-white">
+        <h5>{{ viatura.marca }} {{ viatura.modelo }} ({{ viatura.ano }})</h5>
+    </div>
+    <div class="card-body">
+        <p><strong>Tipo:</strong> {{ viatura.tipo }}</p>
+        <p><strong>Cliente:</strong> {{ viatura.cliente.user.username }}</p>
+
+        <h6 class="mt-3">Reparações desta viatura:</h6>
+        {% if viatura.reparacoes.all %}
+            <ul class="list-group">
+                {% for reparacao in viatura.reparacoes.all %}
+                    <li class="list-group-item">
+                        <strong>{{ reparacao.descricao }}</strong><br>
+                        Estado:
+                        {% if reparacao.status == 'em_andamento' %}
+                            <span class="badge badge-warning text-dark">Em Andamento</span>
+                        {% elif reparacao.status == 'concluida' %}
+                            <span class="badge badge-success">Concluída</span>
+                        {% elif reparacao.status == 'aguarda_pecas' %}
+                            <span class="badge badge-secondary">Aguarda Peças</span>
+                        {% endif %}
+                        <br>
+                        Custo Total: <strong>{{ reparacao.custo_total }} €</strong>
+
+                        <!-- Botão para mostrar/ocultar formulário de edição -->
+                        <button class="btn btn-sm btn-info mt-2" type="button" data-toggle="collapse" data-target="#editReparacao{{ reparacao.id }}" aria-expanded="false" aria-controls="editReparacao{{ reparacao.id }}">
+                            Editar
+                        </button>
+
+                        <div class="collapse mt-2" id="editReparacao{{ reparacao.id }}">
+                            <form method="post" action="{% url 'onlinecourse:editar_reparacao' reparacao.id %}">
+                                {% csrf_token %}
+                                <label><strong>Descrição:</strong></label>
+                                <input class="form-control" type="text" name="descricao" value="{{ reparacao.descricao }}">
+
+                                <label class="mt-2"><strong>Estado:</strong></label>
+                                <select class="form-control" name="status">
+                                    <option value="em_andamento" {% if reparacao.status == 'em_andamento' %}selected{% endif %}>Em andamento</option>
+                                    <option value="concluida" {% if reparacao.status == 'concluida' %}selected{% endif %}>Concluída</option>
+                                    <option value="aguarda_pecas" {% if reparacao.status == 'aguarda_pecas' %}selected{% endif %}>Aguarda peças</option>
+                                </select>
+
+                                <label class="mt-2"><strong>Custo total (€):</strong></label>
+                                <input class="form-control" type="number" step="0.01" name="custo_total" value="{{ reparacao.custo_total }}">
+
+                                <button class="btn btn-primary mt-2" type="submit">Guardar alterações</button>
+                            </form>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-muted">Sem reparações registadas.</p>
+        {% endif %}
+
+        <!-- Formulário para adicionar nova reparação -->
+        <button class="btn btn-success mt-3" type="button" data-toggle="collapse" data-target="#addReparacao{{ viatura.id }}" aria-expanded="false" aria-controls="addReparacao{{ viatura.id }}">
+            Adicionar Reparação
+        </button>
+
+        <div class="collapse mt-2" id="addReparacao{{ viatura.id }}">
+            <form method="post" action="{% url 'onlinecourse:adicionar_reparacao' viatura.id %}">
+                {% csrf_token %}
+                <label><strong>Descrição:</strong></label>
+                <input class="form-control" type="text" name="descricao" placeholder="Descrição da reparação">
+
+                <label class="mt-2"><strong>Estado:</strong></label>
+                <select class="form-control" name="status">
+                    <option value="em_andamento">Em andamento</option>
+                    <option value="concluida">Concluída</option>
+                    <option value="aguarda_pecas">Aguarda peças</option>
+                </select>
+
+                <label class="mt-2"><strong>Custo total (€):</strong></label>
+                <input class="form-control" type="number" step="0.01" name="custo_total" placeholder="0.00">
+
+                <button class="btn btn-success mt-2" type="submit">Adicionar</button>
+            </form>
+        </div>
+
+    </div>
+</div>
+{% endfor %}
+            {% else %}
+                <p class="text-muted">Não tem viaturas atribuidas.</p>
+            {% endif %}
+        {% else %}
+            <p>Por favor, <a href="{% url 'onlinecourse:login' %}">inicie sessão</a> para ver as suas viaturas.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

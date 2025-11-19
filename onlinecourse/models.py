@@ -12,7 +12,7 @@ import uuid
 
 # Mecanico model
 class Mecanico(models.Model):
-    user = models.ForeignKey(
+    user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
     )
@@ -23,7 +23,7 @@ class Mecanico(models.Model):
 
 # Vendedor model
 class Vendedor(models.Model):
-    user = models.ForeignKey(
+    user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
     )
@@ -34,7 +34,7 @@ class Vendedor(models.Model):
     
 
 class Administrativo(models.Model):
-    user = models.ForeignKey(
+    user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
     )
@@ -82,7 +82,7 @@ class PecaReparacao(models.Model):
 
 
 class Cliente(models.Model):
-    user = models.ForeignKey(
+    user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
     )

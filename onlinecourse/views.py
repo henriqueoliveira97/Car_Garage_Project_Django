@@ -34,7 +34,7 @@ def registration_request(request):
             user = User.objects.create_user(username=username, first_name=first_name, last_name=last_name,
                                             password=password)
             login(request, user)
-            return redirect("onlinecourse:viaturas", pk=user.id)
+            return redirect("onlinecourse:cliente", pk=user.id)
         else:
             context['message'] = "User already exists."
             return render(request, 'onlinecourse/user_registration_bootstrap.html', context)
@@ -48,7 +48,19 @@ def login_request(request):
         user = authenticate(username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('onlinecourse:viaturas', pk=user.id)
+            #Cliente
+            if hasattr(user, 'cliente'):
+                return redirect('onlinecourse:cliente', pk=user.cliente.id)
+
+            # Mecânico
+            if hasattr(user, 'mecanico'):
+                return redirect('onlinecourse:mecanico', pk=user.mecanico.id)
+
+            # Admin 
+            if user.is_staff or user.is_superuser:
+                return redirect('onlinecourse:administrative', pk=user.id)
+
+            return redirect('onlinecourse:index')
         else:
             context['message'] = "Invalid username or password."
             return render(request, 'onlinecourse/user_login_bootstrap.html', context)
@@ -59,6 +71,42 @@ def login_request(request):
 def logout_request(request):
     logout(request)
     return redirect('onlinecourse:index')
+
+def editar_reparacao(request, reparacao_id):
+    reparacao= get_object_or_404(Reparacao, id= reparacao_id)
+
+    # Só permite que o mecânico responsável edite
+    if reparacao.mecanico.user != request.user:
+        return HttpResponseForbidden("Não tem permissão para editar esta reparação.")
+
+    if request.method == "POST":
+        reparacao.descricao = request.POST.get("descricao")
+        reparacao.status = request.POST.get("status")
+        reparacao.custo_total = request.POST.get("custo_total")
+        reparacao.save()
+        return redirect('onlinecourse:mecanico', pk=reparacao.mecanico.id)
+    return redirect('onlinecourse:mecanico', pk=reparacao.mecanico.id)
+
+def adicionar_reparacao(request, viatura_id):
+    viatura = get_object_or_404(Viatura, id=viatura_id)
+    mecanico = viatura.mecanico  
+
+    if request.method == "POST":
+        descricao = request.POST.get("descricao")
+        status = request.POST.get("status")
+        custo_total = request.POST.get("custo_total") or 0
+
+        
+        reparacao = Reparacao.objects.create(
+            descricao=descricao,
+            status=status,
+            custo_total=custo_total,
+            mecanico=mecanico,
+            viatura=viatura
+        )
+        return redirect('onlinecourse:mecanico', pk=mecanico.id)
+    
+    return redirect('onlinecourse:mecanico', pk=mecanico.id)
 
 class ClientView(generic.ListView):
     template_name = 'onlinecourse/client_details_bootstrap.html'
@@ -71,6 +119,24 @@ class ClientView(generic.ListView):
             if cliente:
                 return Viatura.objects.filter(cliente=cliente).prefetch_related('reparacoes')
         return Viatura.objects.none()
+
+class MecanincalView(generic.ListView):
+    template_name= 'onlinecourse/mecanic_details_bootstrap.html'
+    context_object_name= 'viaturas'
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_authenticated:
+            mecanico = Mecanico.objects.filter(user= user).first()
+            if mecanico:
+                return Viatura.objects.filter(mecanico=mecanico)
+        return Viatura.objects.none()
+    
+class AdministrativeView(generic.ListView):
+    template_name= 'onlinecourse/admin_details_bootstrap.html'
+    context_object_name = 'administrative'
+
+
 
 
 class InitialView(TemplateView):
