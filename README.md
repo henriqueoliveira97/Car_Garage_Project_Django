@@ -26,7 +26,9 @@ cd Car_Garage_Project_Django
 -Cria e ativa o ambiente virtual
 python -m venv venv
 venv\Scripts\activate   # no Windows
+
 ou
+
 source venv/bin/activate   # no Linux/Mac
 
 -Instala as dependências
