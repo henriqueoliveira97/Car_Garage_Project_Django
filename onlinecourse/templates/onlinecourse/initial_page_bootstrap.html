@@ -45,7 +45,7 @@
                         {% csrf_token %}
                         <div class="input-group">
                             <input type="text" class="form-control" placeholder="Username" name="username" >
-                            <input type="password" class="form-control" placeholder="Username" name="psw" >
+                            <input type="password" class="form-control" placeholder="Password" name="psw" >
                             <button class="btn btn-primary" type="submit">Login</button>
                             <a class="btn btn-link" href="{% url 'onlinecourse:registration' %}">Sign Up</a>
                         </div>
@@ -65,18 +65,23 @@
             <p class="lead">O seu parceiro de confiança para manutenção e reparação automóvel.</p>
             <hr class="my-4">
             <p>Oferecemos diagnósticos rápidos, reparações certificadas e acompanhamento online do estado da sua viatura.</p>
-
             {% if user.is_authenticated %}
-                 <a class="btn btn-primary btn-lg mt-2"
-                    href="{% url 'onlinecourse:cliente' user.id %}">
-                    Acompanhar Reparação
-                 </a>
+                {% if user.is_staff %}
+                    <a class="btn btn-primary btn-lg mt-2" href="{% url 'onlinecourse:admin' user.id %}">
+                        Painel Administrativo
+                    </a>
+                {% elif user.mecanico %}
+                    <a class="btn btn-primary btn-lg mt-2" href="{% url 'onlinecourse:mecanico' user.mecanico.id %}">
+                        Painel Mecânico
+                    </a>
+                {% elif user.cliente %}
+                    <a class="btn btn-primary btn-lg mt-2" href="{% url 'onlinecourse:cliente' user.cliente.id %}">
+                        Acompanhar Reparação
+                    </a>
+                {% endif %}
             {% else %}
                 <a class="btn btn-primary btn-lg mt-2" href="{% url 'onlinecourse:login' %}">
-                    Acompanhar Reparação
-                </a>
-                <a class="btn btn-outline-secondary btn-lg mt-2" href="{% url 'onlinecourse:registration' %}">
-                    Registar-se
+                    Entrar
                 </a>
             {% endif %}
         </div>

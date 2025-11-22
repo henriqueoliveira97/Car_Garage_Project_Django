@@ -17,6 +17,7 @@ urlpatterns = [
     path('admin/<int:pk>/', views.AdministrativeView.as_view(), name='admin'),
     path('reparacao/editar/<int:reparacao_id>/', views.editar_reparacao, name='editar_reparacao'),
     path('reparacao/adicionar/<int:viatura_id>/', views.adicionar_reparacao, name='adicionar_reparacao'),
+    path('adicionar_viatura/', views.adicionar_viatura, name='adicionar_viatura'),
 
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+     {% load static %}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+    <!-- Navigation bar -->
+    <nav class="navbar navbar-light bg-light">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                  <a class="navbar-brand" href="{% url 'onlinecourse:index' %}">Home</a>
+            </div>
+            <ul class="nav navbar-nav navbar-right">
+                {% if user.is_authenticated %}
+                
+                <li>
+                    <a class="btn btn-link" href="#">{{ user.first_name }}({{ user.username }})</a>
+                    <a class="btn btn-link" href="{% url 'onlinecourse:logout' %}">Logout</a>
+                </li>
+                {% else %}
+                <li>
+                    <form class="form-inline" action="{% url 'onlinecourse:login' %}" method="post">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Username" name="username" >
+                            <input type="password" class="form-control" placeholder="Username" name="psw" >
+                            <button class="btn btn-primary" type="submit">Login</button>
+                            <a class="btn btn-link" href="{% url 'onlinecourse:registration' %}">Sign Up</a>
+                        </div>
+                    </form>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+     <!-- Page content -->
+    <div class="container-fluid mt-4">
+        <h2>Bem-vindo, {{ user.first_name }}!</h2>
+
+        {% if user.is_authenticated %}
+            {% if user.is_staff %}
+                <button class="btn btn-success mt-3" type="button" data-toggle="collapse" data-target="#addViatura" aria-expanded="false" aria-controls="addViatura">
+                    Adicionar Reparação
+                </button>
+                <button class="btn btn-success mt-3" type="button" data-toggle="collapse" data-target="#seeViaturas" aria-expanded="false" aria-controls="seeViaturas">
+                    Viaturas na oficina
+                </button>
+
+                <!--Formulário Viatura-->
+                <div class="collapse mt-2" id="addViatura">
+                    <form method="post" action="{% url 'onlinecourse:adicionar_viatura' %}">
+                        {% csrf_token %}
+                        <label><strong>Tipo:</strong></label>
+                        <input class="form-control" type="text" name="tipo" placeholder="Tipo do veiculo">
+
+                        <label><strong>Marca:</strong></label>
+                        <input class="form-control" type="text" name="marca" placeholder="Marca do veiculo">
+
+                        <label><strong>Modelo:</strong></label>
+                        <input class="form-control" type="text" name="modelo" placeholder="Modelo do veiculo">
+
+                        <label><strong>Ano:</strong></label>
+                        <input class="form-control" type="text" name="ano" placeholder="Ano do veiculo">
+
+                        <label><strong>Data Chegada:</strong></label>
+                        <input class="form-control" type="date" name="data_chegada">
+
+                        <label><strong>Data Saída:</strong></label>
+                        <input class="form-control" type="date" name="data_saida">
+
+                        <label><strong>Mecânico:</strong></label>
+                        <select class="form-control" name="mecanico">
+                            {% for mec in mecanicos %}
+                                <option value="{{ mec.id }}">{{ mec.user.username }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <label><strong>Cliente:</strong></label>
+                        <select class="form-control" name="cliente">
+                            {% for cli in clientes %}
+                                <option value="{{ cli.id }}">{{ cli.user.username }}</option>
+                            {% endfor %}
+                            <option value="novo"> Criar novo cliente</option>
+                        </select>
+
+                        <div id="novoClienteBox" style="display:none; margin-top:10px;">
+                            <label><strong>Novo Cliente (username):</strong></label>
+                            <input class="form-control" type="text" name="novo_cliente_username">
+
+                            <label class="mt-2"><strong>Password:</strong></label>
+                            <input class="form-control" type="password" name="novo_cliente_password" placeholder="Password">
+                        </div>
+
+                        <button class="btn btn-success mt-2" type="submit">Adicionar</button>
+                    </form>
+
+                    <script>
+                    document.addEventListener("DOMContentLoaded", function() {
+                        const clienteSelect = document.querySelector("select[name='cliente']");
+                        const novoClienteBox = document.getElementById("novoClienteBox");
+
+                        clienteSelect.addEventListener("change", function() {
+                            if (this.value === "novo") {
+                                novoClienteBox.style.display = "block";
+                            } else {
+                                novoClienteBox.style.display = "none";
+                            }
+                        });
+                    });
+                    </script>
+                    </form>
+                </div>
+            {% endif %}
+    {% endif %}
+    </div>
+    <div class="collapse mt-3" id="seeViaturas">
+    <h4>Viaturas na oficina</h4>
+    <table class="table table-striped mt-2">
+        <thead>
+            <tr>
+                <th>ID</th><th>Tipo</th><th>Marca</th><th>Modelo</th><th>Ano</th>
+                <th>Data Chegada</th><th>Data Saída</th><th>Mecânico</th><th>Cliente</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for viatura in viaturas %}
+            <tr>
+                <td>{{ viatura.id }}</td>
+                <td>{{ viatura.tipo }}</td>
+                <td>{{ viatura.marca }}</td>
+                <td>{{ viatura.modelo }}</td>
+                <td>{{ viatura.ano }}</td>
+                <td>{{ viatura.data_chegada }}</td>
+                <td>{{ viatura.data_saida }}</td>
+                <td>{{ viatura.mecanico.user.username }}</td>
+                <td>{{ viatura.cliente.user.username }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9" class="text-center">Não existem viaturas na oficina.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

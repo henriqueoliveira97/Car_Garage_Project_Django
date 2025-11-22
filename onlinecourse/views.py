@@ -58,7 +58,7 @@ def login_request(request):
 
             # Admin 
             if user.is_staff or user.is_superuser:
-                return redirect('onlinecourse:administrative', pk=user.id)
+                return redirect('onlinecourse:admin', pk=user.id)
 
             return redirect('onlinecourse:index')
         else:
@@ -108,6 +108,45 @@ def adicionar_reparacao(request, viatura_id):
     
     return redirect('onlinecourse:mecanico', pk=mecanico.id)
 
+def adicionar_viatura_view(request):
+    mecanicos = Mecanico.objects.all()
+    clientes = Cliente.objects.all()
+
+    context = {
+        "mecanicos": mecanicos,
+        "clientes": clientes,
+    }
+    return render(request, "onlinecourse/admin_details_bootstrap.html", context)
+
+def adicionar_viatura(request):
+    if request.method == "POST":
+        mecanico_id = request.POST.get("mecanico")
+        cliente_id = request.POST.get("cliente")
+
+        # Se for novo cliente
+        if cliente_id == "novo":
+            novo_username = request.POST.get("novo_cliente_username")
+            novo_password = request.POST.get("novo_cliente_password")
+            user = User.objects.create_user(username=novo_username, password=novo_password)
+            cliente = Cliente.objects.create(user=user)
+        else:
+            cliente = Cliente.objects.get(id=cliente_id)
+
+        mecanico = Mecanico.objects.get(id=mecanico_id)
+
+        Viatura.objects.create(
+            tipo=request.POST.get("tipo"),
+            marca=request.POST.get("marca"),
+            modelo=request.POST.get("modelo"),
+            ano=request.POST.get("ano"),
+            data_chegada=request.POST.get("data_chegada"),
+            data_saida=request.POST.get("data_saida"),
+            mecanico=mecanico,
+            cliente=cliente
+        )
+
+        return redirect("onlinecourse:admin", pk=request.user.id)
+
 class ClientView(generic.ListView):
     template_name = 'onlinecourse/client_details_bootstrap.html'
     context_object_name = 'viaturas'
@@ -133,10 +172,15 @@ class MecanincalView(generic.ListView):
         return Viatura.objects.none()
     
 class AdministrativeView(generic.ListView):
-    template_name= 'onlinecourse/admin_details_bootstrap.html'
-    context_object_name = 'administrative'
+    model = Viatura
+    template_name = 'onlinecourse/admin_details_bootstrap.html'
+    context_object_name = 'viaturas'
 
-
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['mecanicos'] = Mecanico.objects.all()
+        context['clientes'] = Cliente.objects.all()
+        return context
 
 
 class InitialView(TemplateView):
